@@ -4,14 +4,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import model.exception.DomainException;
+
 public class Reservation {
 	private Integer roomNumber;
 	private Date checkIn;
 	private Date checkOut;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	
-	public Reservation(Integer roomNumber, Date checkIn, Date checkOut) {
-		super();
+	public Reservation(Integer roomNumber, Date checkIn, Date checkOut) throws DomainException {
+		//condição no construtor chama programação defensiva
+		if(!checkOut.after(checkIn)) {
+			throw new DomainException("Check-out date must be after check-in date");
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
@@ -41,20 +46,23 @@ public class Reservation {
 		return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 	}
 	
-	public String updateDates(Date checkIn, Date checkOut) {
+	//essa classe por ser void como não retorna nada, vai precisar lançar uma exceção. Com o throws ele pode lançar uma exceção, dependendo do erro que pode acontecer no método
+	public void updateDates(Date checkIn, Date checkOut) throws DomainException {
 		Date now = new Date();
 		//testa se a data do check-in ou check-out é antes da data autal
 		if(checkIn.before(now) || checkOut.before(now)) {
-			 return "Reservation dates for update must be future dates";
+			
+			//o throw lança uma exceção, no caso é esse illegal, este trata um erro caso os parâmetro que foram passados são inválidos
+			throw new DomainException("Reservation dates for update must be future dates");
 		}
 		if(!checkOut.after(checkIn)) {
-			return "Check-out date must be after check-in date";
+			throw new DomainException("Check-out date must be after check-in date");
 		}
 		
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
 		//Caso não tenha acontecido nenhum erro ele retorna null
-		return null;
+		
 	}
 	
 	@Override
